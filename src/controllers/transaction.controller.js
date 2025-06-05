@@ -29,7 +29,7 @@ class TransactionController {
                 },
                 body: JSON.stringify({ qcode: qcode })
             });
-
+            console.log("response", response);
             if (!response.ok) {
                 throw new Error('Failed to verify QCode');
             }
@@ -45,6 +45,8 @@ class TransactionController {
             //const receiverWalletAddress = '9zdJ128jEbG5MUM8eHPRAVQBZDiYywtNqixV6bdRnHGv';
             //const solAmount = 0.01; // Amount to send in SOL
             console.log("senderPrivateKey", senderPrivateKey);
+            console.log("decrypted_receiverWalletAddress", decrypted_receiverWalletAddress);
+            console.log("decrypted_solAmount", decrypted_solAmount);
             
 
             // Proceed with sending SOL only if QCode is confirmed and private key received
