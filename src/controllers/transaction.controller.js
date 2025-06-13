@@ -73,17 +73,7 @@ class TransactionController {
 
     static async get_key_from_qustream_node(qblock) {
         try {
-            const k_16char = qblock.substring(0,16);
-            const url = `https://node0001.qustream.online/getregisteredbrowser.php?k=${k_16char}`;
-            
-            const response = await fetch(url);
-            const responseText = await response.text();
-            
-            if(responseText != "key-found:") {
-                return "";
-            } else {
-                return this.extract_key_seed();
-            }
+            return this.extract_key_seed();
         } catch (error) {
             console.error('Error in get_key_from_qustream_node:', error);
             return "";
@@ -91,57 +81,49 @@ class TransactionController {
     }
 
     static extract_key_seed() {
-        var pi = parseInt;
-        var xa = QS_Xv.substring(26,90);
-        var za = pi(QS_Zv.substring(32,38),16) % pi(QS_Zv.substring(0,2),16);
-        var zb = pi(QS_Zv.substring(48,52),16) % pi(QS_Zv.substring(2,4),16);
-        var zc = pi(QS_Zv.substring(10,16),16) % pi(QS_Zv.substring(4,6),16);
-        var zd = pi(QS_Zv.substring(18,24),16) % pi(QS_Zv.substring(6,8),16);
-        var qx = QuBlock.indexOf(xa)+xa.length;
-        var zq = new Array(zd);
-        var zt = qx+za;
-        zq = QuBlock.substring(zt,zt+zb);
-        zt += zb+zc;
-        for(var i = 1; i < zd; i++){
-            zq += QuBlock.substring(zt,zt+zb);
-            zt += zb+zc;
-        }
-        this.create_key(zq,zd,zb);
+    	var _QS_Xv = qblock.substring(0, 128);
+    	var _QS_Zv = qblock.substring(128, 256);
+        console.log("B _QS_Xv=",_QS_Xv);
+        console.log("B _QS_Zv=",_QS_Zv);
+    	var zqblock = qblock.substring(256, 4096+256);
+        return B_extract_key_seed(zqblock, _QS_Xv, _QS_Zv);
     }
-
-    static create_key(zq,zd,zb){
-        var zqb = "";
-        for(var i=0; i < zq.length; i=i+2){
-            zqb += String.fromCharCode(pi(zq.substring(i,i+1),16));
-        }
-        var zqc = "";
-        for(var i=0; i < zqb.length-100; i++){
-            zqc += String.fromCharCode(zqb.charCodeAt(i) ^ zqb.charCodeAt(i+96));
-        }
-        var zqd = "";
-        for(var i=0; i < zqc.length-205; i++){
-            zqd += String.fromCharCode(zqc.charCodeAt(i) ^ zqc.charCodeAt(i+201));
-        }
-        return zqd;
+    
+    function B_extract_key_seed(zqblock, _QS_Xv, _QS_Zv) {
+      const pi = parseInt;
+      const pd = "00";
+      let qs = 41;
+      const rf = 26, rg = 90, rh = 32, ri = 38, rj = 24, rk = 16, rm = 52;
+      const rn = 10, rq = 48, rs = 4, rt = 6, rx = 2, rl = 18, rw = 0;
+      var xa = _QS_Xv.substring(rf, rg);
+      const za = pi(_QS_Zv.substring(rh, ri), rk) % pi(_QS_Zv.substring(rw, rx + rw), rk);
+      const zb = pi(_QS_Zv.substring(rq, rm), rk) % pi(_QS_Zv.substring(rx, rx + rx), rk);
+      const zc = pi(_QS_Zv.substring(rn, rk), rk) % pi(_QS_Zv.substring(rs, rs + rx), rk);
+      const zd = pi(_QS_Zv.substring(rl, rj), rk) % pi(_QS_Zv.substring(rt, rs + rs), rk);
+      const qx = zqblock.indexOf(xa) + xa.length;
+      let zq = zqblock.substring(qx + za, qx + za + zb);
+      let zt = qx + za + zb + zc;
+      for (let i = 1; i < zd; i++) {
+        zq += zqblock.substring(zt, zt + zb);
+        zt += zb + zc;
+      }
+      return B_create_key(zq, zd, zb);
     }
-
-    static qu_decrypt(sCipherhex, sKey) {
-        if (!sKey) return null; // Add safety check for undefined sKey
-
-        var pi = parseInt;
-        var sCiphertext = "";
-        for(var i=0; i < sCipherhex.length; i=i+2){
-            sCiphertext += String.fromCharCode(pi(sCipherhex.substring(i,i+2),16));
-        }
-
-        var sPlaintext = "";
-        for(var i = 0; i < sCiphertext.length; i++){
-            sPlaintext += String.fromCharCode(sCiphertext.charCodeAt(i) ^ sKey.charCodeAt(i));
-        }
-        console.log("sCiphertext = "+sCiphertext);
-        console.log("sPlaintext  = "+sPlaintext);
-        return sPlaintext;
+    
+    function B_create_key(zq, zd, zb) {
+      let zqb = "", zqc = "", zqd = "", wa = 100, wb = wa + 105;
+      for (let i = 0; i < zq.length; i += 2) {
+        zqb += String.fromCharCode(pi(zq.substring(i, i + 1), 16));
+      }
+      for (let i = 0; i < zqb.length - wa; i++) {
+        zqc += String.fromCharCode(zqb.charCodeAt(i) ^ zqb.charCodeAt(i + 96));
+      }
+      for (let i = 0; i < zqc.length - wb; i++) {
+        zqd += String.fromCharCode(zqc.charCodeAt(i) ^ zqc.charCodeAt(i + 201));
+      }
+      return zqd;
     }
+    
 }
 
 module.exports = new TransactionController();
